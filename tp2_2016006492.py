@@ -15,9 +15,12 @@ def is_infeasible(tableau, n):
 def simplex(n, m, c, A, b):
     tableau = []
     for i in range(n):
-        tableau.append(A[i] + [0]*i + [1] + [0]*(n-i-1) + [b[i]])
-    
-    tableau.append([0]*(m + n) + [1])
+        #tableau.append(A[i] + [0]*i + [1] + [0]*(n-i-1) + [b[i]])
+        tableau.append(A[i] + [0]*n + [b[i]])
+
+    #tableau.append([0]*(m + n) + [1])
+    tableau.append([-ci for ci in c] + [0]*n + [0])
+
     
     while is_infeasible(tableau, n):
         row = min(range(n), key=lambda i: tableau[i][-1])
@@ -28,12 +31,12 @@ def simplex(n, m, c, A, b):
     
     if any(tableau[i][-1] < 0 for i in range(n)):
         print("inviavel")
-        certificate = [0]*m
-        for i in range(n):
-            for j in range(m):
-                if tableau[i][j] == 1:
-                    certificate[j] = tableau[i][-1]
-        print(" ".join(f"{y:.3f}" for y in certificate))
+        # certificate = [0]*m
+        # for i in range(n):
+        #     for j in range(m):
+        #         if tableau[i][j] == 1:
+        #             certificate[j] = tableau[i][-1]
+        # print(" ".join(f"{y:.3f}" for y in certificate))
         return
     
     tableau.pop()
@@ -57,15 +60,15 @@ def simplex(n, m, c, A, b):
         
         if row == -1:
             print("ilimitada")
-            solution = [0]*m
-            for i in range(n):
-                for j in range(m):
-                    if tableau[i][j] == 1:
-                        solution[j] = tableau[i][-1]
-            print(" ".join(f"{x:.3f}" for x in solution))
-            direction = [0]*m
-            direction[col] = 1
-            print(" ".join(f"{d:.3f}" for d in direction))
+            # solution = [0]*m
+            # for i in range(n):
+            #     for j in range(m):
+            #         if tableau[i][j] == 1:
+            #             solution[j] = tableau[i][-1]
+            # print(" ".join(f"{x:.3f}" for x in solution))
+            # direction = [0]*m
+            # direction[col] = 1
+            # print(" ".join(f"{d:.3f}" for d in direction))
             return
         
         pivot(tableau, row, col)
@@ -81,25 +84,27 @@ def simplex(n, m, c, A, b):
     print(" ".join(f"{x:.3f}" for x in solution))
     
     certificate = tableau[-1][m:m+n]
-    print(" ".join(f"{y:.3f}" for y in certificate))
+    #print(" ".join(f"{y:.3f}" for y in certificate))
 
 
 if __name__ == "__main__":
+    # Lê o nome do arquivo de entrada do argumento de linha de comando
     input_file = sys.argv[1]
+    
     with open(input_file, 'r') as file:
-        data = file.read().strip().split()
+        # Lê a primeira linha (n e m)
+        n, m = map(int, file.readline().split())
+        
+        # Lê a segunda linha (vetor de custos c)
+        c = list(map(float, file.readline().split()))
+        
+        # Lê as n linhas seguintes contendo as restrições
+        A = []
+        b = []
+        for i in range(n):
+            linha = list(map(float, file.readline().split()))
+            A.append(linha[:m])  # m primeiros valores são os coeficientes da restrição
+            b.append(linha[m])   # último valor é o valor b_i
     
-    index = 0
-    n = int(data[index])
-    m = int(data[index + 1])
-    c = list(map(int, data[index + 2:index + 2 + m]))
-    A = []
-    b = []
-    
-    index = index + 2 + m
-    for i in range(n):
-        A.append(list(map(int, data[index:index + m])))
-        b.append(int(data[index + m]))
-        index += m + 1
-   
+    # Chama o método simplex com os dados lidos
     simplex(n, m, c, A, b)
